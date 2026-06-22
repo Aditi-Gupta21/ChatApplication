@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 08953a4c9bd3ee7a93ceca63a486d8d847ec9ff4 Aditi Gupta <aditigupta.21apr@gmail.com> 1782017952 +0530	commit (initial): Set up Express server, database connection, chat APIs, User model and controller
+08953a4c9bd3ee7a93ceca63a486d8d847ec9ff4 08953a4c9bd3ee7a93ceca63a486d8d847ec9ff4 Aditi Gupta <aditigupta.21apr@gmail.com> 1782018124 +0530	Branch: renamed refs/heads/main to refs/heads/main
+08953a4c9bd3ee7a93ceca63a486d8d847ec9ff4 b2bdb2e5a0de69595d674061532e3bb347f7d7d9 Aditi Gupta <aditigupta.21apr@gmail.com> 1782020070 +0530	commit: Added Authentication middleware
+b2bdb2e5a0de69595d674061532e3bb347f7d7d9 5af1a0f7763c48aa758ac88a5817ea4e1fdd9dbf Aditi Gupta <aditigupta.21apr@gmail.com> 1782117231 +0530	commit: Added send and receiver message APIs
