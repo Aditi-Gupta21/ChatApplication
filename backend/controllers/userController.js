@@ -24,11 +24,14 @@ export const register = async(req , res) =>{
     const maleAvatar = `https://avatarapi.runflare.run/public/boy?username=${userName}`;
     const femaleAvatar = `https://avatarapi.runflare.run/public/girl?username=${userName}`;
 
-    await User.create({
+    const newUser = await User.create({
       fullName, userName, gender,
       password : hashedPassword,
       profilePhoto: gender==="male"?maleAvatar:femaleAvatar
     })
+
+    // console.log(newUser);
+    
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -36,6 +39,7 @@ export const register = async(req , res) =>{
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({message : "User not create",error: error.message})
   }
 }

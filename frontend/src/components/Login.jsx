@@ -1,7 +1,41 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+  const [user, setUser] = useState({
+    userName: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post('http://localhost:9000/api/v1/user/login', user, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true
+      });
+      navigate("/");
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
+    }
+
+    setUser({
+      userName: "",
+      password: "",
+    })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black/20 px-4">
       <div className="w-full max-w-md">
@@ -19,13 +53,14 @@ const Login = () => {
             Login
           </h1>
 
-          <form>
+          <form onSubmit={onSubmitHandler}>
             {/* Username */}
             <div className="mb-4">
               <label className="label p-1">
                 <span className="label-text text-white">Username</span>
               </label>
               <input
+                value={user.userName} onChange={(e) => setUser({ ...user, userName: e.target.value })}
                 type="text"
                 placeholder="username"
                 className="input input-bordered w-full bg-white/10 border-white/20 text-white placeholder-gray-300"
@@ -38,6 +73,7 @@ const Login = () => {
                 <span className="label-text text-white">Password</span>
               </label>
               <input
+                value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })}
                 type="password"
                 placeholder="Password"
                 className="input input-bordered w-full bg-white/10 border-white/20 text-white placeholder-gray-300"
