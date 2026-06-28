@@ -2,115 +2,172 @@ import { User } from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const register = async(req , res) =>{
+export const register = async (req, res) => {
   try {
-    const {fullName,userName, password, confirmPassword, gender} = req.body;
+    const {
+      fullName,
+      userName,
+      password,
+      confirmPassword,
+      gender,
+    } = req.body;
 
-    if(!fullName || !userName || !password || !confirmPassword || !gender){
-      return res.status(400).json({message: "All fields are requied"});
+    if (
+      !fullName ||
+      !userName ||
+      !password ||
+      !confirmPassword ||
+      !gender
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    if(password != confirmPassword){
-      return res.status(400).json({message : "Password not match"});
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
     }
 
-    const user = await User.findOne({userName});
+    const existingUser = await User.findOne({ userName });
 
-    if(user){
-      return res.status(400).json({message:"Username already exit try different username "});
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Username already exists",
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password,10);
-    const maleAvatar = `https://avatarapi.runflare.run/public/boy?username=${userName}`;
-    const femaleAvatar = `https://avatarapi.runflare.run/public/girl?username=${userName}`;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
-      fullName, userName, gender,
-      password : hashedPassword,
-      profilePhoto: gender==="male"?maleAvatar:femaleAvatar
-    })
+    // DiceBear Avatar
+    const profilePhoto =
+  gender === "male"
+    ? `https://api.dicebear.com/9.x/adventurer/svg?seed=${userName}`
+    : `https://api.dicebear.com/9.x/notionists/svg?seed=${userName}`;
 
-    // console.log(newUser);
-    
+    await User.create({
+      fullName,
+      userName,
+      gender,
+      password: hashedPassword,
+      profilePhoto,
+    });
 
     return res.status(201).json({
+      success: true,
       message: "User registered successfully",
-      success:true
     });
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({message : "User not create",error: error.message})
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to register user",
+      error: error.message,
+    });
   }
-}
+};
 
-
-export const login = async(req,res)=>{
+export const login = async (req, res) => {
   try {
-    const {userName,password}= req.body;
+    const { userName, password } = req.body;
 
-    if(!userName || !password){
-      return res.status(400).json({message: "UserName and password is required",
-        success:false
+    if (!userName || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required",
       });
     }
 
-    const user = await User.findOne({userName});
+    const user = await User.findOne({ userName });
 
-    if(!user){
-      return res.status(400).json({message: "Incorrect userName or password",
-        success:false
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username or password",
       });
     }
 
-    const isPasswordMatch = await bcrypt.compare(password,user.password);
+    const isPasswordMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-    if(!isPasswordMatch){
-      return res.status(400).json({message: "Incorrrect Password or Username"});
+    if (!isPasswordMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username or password",
+      });
     }
 
-    const tokenData ={ userId: user._id }
-    const token = await jwt.sign(tokenData, process.env.JWT_SECRET_KEY , {expiresIn:'1d'});
+    const token = jwt.sign(
+      {
+        userId: user._id,
+      },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "1d",
+      }
+    );
 
-    return res.status(200).cookie("token",token, {maxAge:1*24*60*60*1000, httpOnly:true, sameSite:'strict'}).json({
-      _id:user._id,
-      userName:user.userName,
-      fullName:user.fullName,
-      profilePhoto:user.profilePhoto
-    });
-
+    return res
+      .status(200)
+      .cookie("token", token, {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "strict",
+      })
+      .json({
+        success: true,
+        _id: user._id,
+        fullName: user.fullName,
+        userName: user.userName,
+        profilePhoto: user.profilePhoto,
+      });
   } catch (error) {
     return res.status(500).json({
-      message:error.message
-    })
+      success: false,
+      message: error.message,
+    });
   }
-}
+};
 
-export const logout = (req,res)=>{
+export const logout = (req, res) => {
   try {
-    return res.status(200).cookie("token", "", {maxAge:0}).json({
-      message:"Logged out successfully"
-    });
+    return res
+      .status(200)
+      .cookie("token", "", {
+        maxAge: 0,
+      })
+      .json({
+        success: true,
+        message: "Logged out successfully",
+      });
   } catch (error) {
     return res.status(500).json({
-      message:error.message
-    })
+      success: false,
+      message: error.message,
+    });
   }
-}
+};
 
-
-export const getOtherUser = async(req,res)=>{
+export const getOtherUser = async (req, res) => {
   try {
     const loggedInUserId = req.id;
+
     const otherUser = await User.find({
-      _id:{$ne : loggedInUserId}
+      _id: { $ne: loggedInUserId },
     }).select("-password");
 
     return res.status(200).json(otherUser);
-    
   } catch (error) {
-    return res.status(400).json({
-      message:error.message
-    })
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
-}
+};

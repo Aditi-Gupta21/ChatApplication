@@ -3,6 +3,7 @@ import Message from './Message'
 import useGetMessages from '../Hooks/useGetMessages'
 import { useSelector } from 'react-redux'
 import useGetRealTimeMessage from '../Hooks/useGetRealTimeMessage'
+import MessageSkeleton from './MessageSkeleton'
 
 const Messages = () => {
   useGetRealTimeMessage(); useGetMessages();
@@ -10,11 +11,7 @@ const Messages = () => {
   const { messages, loading } = useSelector(store => store.message);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
+    return <MessageSkeleton/>
   }
 
   if (!messages || messages.length === 0) {

@@ -5,11 +5,11 @@ import userRoute from "./routes/userRoute.js";
 import cookieParser from "cookie-parser";
 import messageRoute from "./routes/messageRoutes.js";
 import cors from 'cors'
+import { app, server } from "./socket/socket.js";
 
 dotenv.config({});
 connectDB();
 
-const app = express();
 const PORT = process.env.PORT || 8000
 
 //middleWare
@@ -29,6 +29,6 @@ app.use("/api/v1/user", userRoute);
 //http://localhost/8000/api/v1/user/register
 app.use("/api/v1/message", messageRoute);
 
-app.listen(PORT, ()=>{
+server.listen(PORT, ()=>{
   console.log(`Sever listen at port ${PORT}`);
 })
