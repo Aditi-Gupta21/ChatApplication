@@ -8,11 +8,9 @@ const OtherUsers = () => {
 
   const { otherUser } = useSelector((store) => store.user);
 
-  if (!otherUser) return null;
-
   return (
     <div className="overflow-auto flex-1">
-      {otherUser?.map((user) => (
+      {otherUser.map((user) => (
         <OtherUser key={user._id} user={user} />
       ))}
     </div>

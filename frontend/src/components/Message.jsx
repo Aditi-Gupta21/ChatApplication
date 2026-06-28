@@ -3,24 +3,27 @@ import { useSelector } from "react-redux";
 
 const Message = ({ message }) => {
   const scroll = useRef();
-  const { authUser, selectedUser } = useSelector((store) => store.user);
+
+  const { authUser, selectedUser } = useSelector(
+    (store) => store.user
+  );
+
+  const isSender = authUser?._id === message?.senderId;
 
   useEffect(() => {
-    scroll.current?.scrollIntoView({ behavior: "smooth" });
+    scroll.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   }, [message]);
-
 
   return (
     <div ref={scroll}>
-      <div
-        className={`chat ${authUser?._id === message?.senderId ? "chat-end" : "chat-start"
-          }`}
-      >
+      <div className={`chat ${isSender ? "chat-end" : "chat-start"}`}>
         <div className="chat-image avatar">
           <div className="w-10 rounded-full">
             <img
               src={
-                authUser?._id === message.senderId
+                isSender
                   ? authUser?.profilePhoto
                   : selectedUser?.profilePhoto
               }
@@ -28,11 +31,20 @@ const Message = ({ message }) => {
             />
           </div>
         </div>
+
         <div className="chat-header">
-          <time className="text-xs text-white">12:45</time>
+          <time className="text-xs text-white">
+            12:45
+          </time>
         </div>
 
-        <div className="chat-bubble">
+        <div
+          className={`chat-bubble ${
+            isSender
+              ? "bg-black text-white"
+              : "bg-white text-black"
+          }`}
+        >
           {message?.message}
         </div>
       </div>
