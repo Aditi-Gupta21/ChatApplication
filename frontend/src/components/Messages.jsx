@@ -1,25 +1,40 @@
 import React from 'react'
 import Message from './Message'
 import useGetMessages from '../Hooks/useGetMessages'
-import {useSelector} from 'react-redux'
+import { useSelector } from 'react-redux'
 import useGetRealTimeMessage from '../Hooks/useGetRealTimeMessage'
 
 const Messages = () => {
   useGetRealTimeMessage(); useGetMessages();
-  const {messages} = useSelector(store=>store.message);
 
+  const { messages, loading } = useSelector(store => store.message);
 
-  if(!messages) return null;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full text-gray-400">
+        No messages yet.
+      </div>
+    );
+  }
+
   return (
     <div className='px-4 flex-1 overflow-auto'>
       {
-        messages?.map((message)=>{
+        messages?.map((message) => {
           return (
-            <Message key={message._id} message={message}/>
+            <Message key={message._id} message={message} />
           )
         })
       }
-      
+
     </div>
   )
 }
