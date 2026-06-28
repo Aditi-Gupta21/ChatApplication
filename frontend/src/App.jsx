@@ -9,7 +9,7 @@ import Home from "./components/Home.jsx";
 import Login from "./components/Login.jsx";
 
 import { setSocket } from "./redux/socketSlice.js";
-import { setOnlineUser } from "./redux/userSlice.js";
+import { setOnlineUser , setIsTyping } from "./redux/userSlice.js";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +36,7 @@ function App() {
     if (!authUser) {
       dispatch(setSocket(null));
       dispatch(setOnlineUser([]));
+      dispatch(setIsTyping(false));
       return;
     }
 
@@ -54,8 +55,30 @@ function App() {
       dispatch(setOnlineUser(onlineUsers));
     });
 
+    let typingTimer;
+
+    socket.on("typing",()=>{
+      dispatch(setIsTyping(true));
+
+      clearTimeout(typingTimer);
+
+      typingTimer = setTimeout(()=>{
+        dispatch(setIsTyping(false));
+      },1000);
+    })
+
+    socket.on("stopTyping", ()=>{
+      clearTimeout(typingTimer);
+      dispatch(setIsTyping(false));
+    })
+
     // Cleanup
     return () => {
+      clearTimeout(typingTimer);
+
+      socket.off("typing");
+      socket.off("stopTyping");
+      socket.off("getOnlineUsers");
       socket.close();
       dispatch(setSocket(null));
     };

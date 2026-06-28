@@ -7,6 +7,7 @@ const userSlice = createSlice({
     otherUser: [],
     selectedUser: null,
     onlineUsers: [],
+    isTyping:false
   },
   reducers: {
     setAuthUser: (state, action) => {
@@ -24,6 +25,10 @@ const userSlice = createSlice({
     setOnlineUser: (state, action) => {
       state.onlineUsers = action.payload;
     },
+
+    setIsTyping:(state, action)=>{
+      state.isTyping = action.payload;
+    },
   },
 });
 
@@ -32,6 +37,7 @@ export const {
   setOtherUser,
   setSelectedUser,
   setOnlineUser,
+  setIsTyping
 } = userSlice.actions;
 
 export default userSlice.reducer;
