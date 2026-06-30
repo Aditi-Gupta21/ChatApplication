@@ -24,6 +24,8 @@ export const sendMessage = async(req, res)=>{
 
     if(newMessage){
       gotConversation.message.push(newMessage._id);
+      gotConversation.lastMessage = newMessage.message;
+      gotConversation.lastMessageTime = newMessage.createdAt;
     }
     await Promise.all([gotConversation.save(), newMessage.save()])
 
@@ -52,11 +54,6 @@ export const getMessage = async(req,res)=>{
     const conversation = await Conversation.findOne({
       participants:{$all: [senderId, receiverId]}
     }).populate("message");
-
-    // const conMes = conversation.message;
-    // conMes.forEach((m)=>{
-    //   console.log(m.message);
-    // })
     
 
     return res.status(200).json(conversation?.message);

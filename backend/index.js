@@ -4,6 +4,7 @@ import connectDB from "./config/database.js";
 import userRoute from "./routes/userRoute.js";
 import cookieParser from "cookie-parser";
 import messageRoute from "./routes/messageRoutes.js";
+import conversationRoute from './routes/conversationRoute.js'
 import cors from 'cors'
 import { app, server } from "./socket/socket.js";
 
@@ -28,6 +29,8 @@ app.use(cors(corsOption));
 app.use("/api/v1/user", userRoute);
 //http://localhost/8000/api/v1/user/register
 app.use("/api/v1/message", messageRoute);
+
+app.use("/api/v1/conversation", conversationRoute )
 
 server.listen(PORT, ()=>{
   console.log(`Sever listen at port ${PORT}`);
