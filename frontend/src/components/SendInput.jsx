@@ -3,6 +3,7 @@ import { IoSend } from "react-icons/io5";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../redux/messageSlice";
+import { updateConversation } from '../redux/conversationSlice'
 
 const SendInput = () => {
   const [message, setMessage] = useState("");
@@ -10,7 +11,7 @@ const SendInput = () => {
   const typingTimeoutRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { selectedUser } = useSelector((store) => store.user);
+  const { selectedUser, authUser } = useSelector((store) => store.user);
   const { messages } = useSelector(store => store.message)
   const { socket } = useSelector((store) => store.socket);
 
@@ -20,10 +21,11 @@ const SendInput = () => {
 
     if (!selectedUser || !socket) return;
 
-    // Emit "typing" only once
+    // Emit typing only once
     if (!typingRef.current) {
       socket.emit("typing", {
         receiverId: selectedUser._id,
+        senderId: authUser._id,
       });
 
       typingRef.current = true;
@@ -35,17 +37,18 @@ const SendInput = () => {
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit("stopTyping", {
         receiverId: selectedUser._id,
+        senderId: authUser._id,
       });
 
       typingRef.current = false;
     }, 1000);
   };
 
-  useEffect(()=>{
-    return () =>{
+  useEffect(() => {
+    return () => {
       clearTimeout(typingTimeoutRef.current);
     };
-  },[]);
+  }, []);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -59,6 +62,7 @@ const SendInput = () => {
       if (socket && selectedUser) {
         socket.emit("stopTyping", {
           receiverId: selectedUser._id,
+          senderId: authUser._id,
         });
 
         typingRef.current = false;
@@ -76,8 +80,12 @@ const SendInput = () => {
         }
       );
 
-      console.log(res.data);
       dispatch(setMessages([...messages, res?.data?.newMessage]));
+      dispatch(updateConversation({
+        receiverId: selectedUser._id,
+        message: res.data.newMessage.message,
+        createdAt: res.data.newMessage.createdAt,
+      }));
 
       // Clear the input after sending
       setMessage("");

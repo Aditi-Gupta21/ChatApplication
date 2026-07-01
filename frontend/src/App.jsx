@@ -10,6 +10,8 @@ import Login from "./components/Login.jsx";
 
 import { setSocket } from "./redux/socketSlice.js";
 import { setOnlineUser , setIsTyping } from "./redux/userSlice.js";
+import useSocketEvents from './Hooks/useSocketEvents.jsx'
+
 
 const router = createBrowserRouter([
   {
@@ -30,6 +32,8 @@ function App() {
   const dispatch = useDispatch();
 
   const { authUser } = useSelector((store) => store.user);
+
+  useSocketEvents();
 
   useEffect(() => {
     // If user is not logged in
@@ -55,29 +59,8 @@ function App() {
       dispatch(setOnlineUser(onlineUsers));
     });
 
-    let typingTimer;
-
-    socket.on("typing",()=>{
-      dispatch(setIsTyping(true));
-
-      clearTimeout(typingTimer);
-
-      typingTimer = setTimeout(()=>{
-        dispatch(setIsTyping(false));
-      },1000);
-    })
-
-    socket.on("stopTyping", ()=>{
-      clearTimeout(typingTimer);
-      dispatch(setIsTyping(false));
-    })
-
     // Cleanup
     return () => {
-      clearTimeout(typingTimer);
-
-      socket.off("typing");
-      socket.off("stopTyping");
       socket.off("getOnlineUsers");
       socket.close();
       dispatch(setSocket(null));

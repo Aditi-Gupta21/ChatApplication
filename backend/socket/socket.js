@@ -29,19 +29,19 @@ io.on("connection", (socket) => {
 
   io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
-  socket.on("typing", ({receiverId}) =>{
+  socket.on("typing", ({receiverId, senderId}) =>{
     const receiverSocketId = getReceiverSocketId(receiverId);
 
     if(receiverSocketId){
-      io.to(receiverSocketId).emit("typing");
+      io.to(receiverSocketId).emit("typing", {senderId});
     }
   })
 
-  socket.on("stopTyping", ({receiverId})=>{
+  socket.on("stopTyping", ({receiverId, senderId})=>{
     const receiverSocketId = getReceiverSocketId(receiverId);
 
     if(receiverSocketId){
-      io.to(receiverSocketId).emit("stopTyping");
+      io.to(receiverSocketId).emit("stopTyping", {senderId});
     }
   })
 
