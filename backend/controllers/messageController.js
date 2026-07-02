@@ -14,7 +14,17 @@ export const sendMessage = async(req, res)=>{
 
     if(!gotConversation){
       gotConversation = await Conversation.create({
-        participants:[senderId, receiverId]
+        participants:[senderId, receiverId],
+        unreadCounts:[
+          {
+            user:senderId,
+            count:0,
+          },
+          {
+            user:receiverId,
+            count:0,
+          }
+        ]
       })
     };
 

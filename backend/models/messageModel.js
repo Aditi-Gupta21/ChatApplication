@@ -14,7 +14,12 @@ const messageModel = new mongoose.Schema({
   message:{
     type:String,
     required:true
+  },
+  seen:{
+    type:Boolean,
+    default:false,
   }
+
 }, {timestamps:true});
 
 export const Message = mongoose.model("Message", messageModel);
