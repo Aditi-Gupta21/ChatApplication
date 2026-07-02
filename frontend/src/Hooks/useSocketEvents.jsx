@@ -63,6 +63,7 @@ const useSocketEvents = () => {
           receiverId: newMessage.senderId,
           message: newMessage.message,
           createdAt: newMessage.createdAt,
+          incrementUnread:selectedUser?._id !== newMessage.senderId,
         })
       );
 

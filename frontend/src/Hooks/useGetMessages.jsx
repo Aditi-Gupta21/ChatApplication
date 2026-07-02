@@ -3,6 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages, setLoading } from "../redux/messageSlice";
 
+
 const useGetMessages = () => {
   const { selectedUser } = useSelector((store) => store.user);
   const dispatch = useDispatch();
@@ -23,9 +24,10 @@ const useGetMessages = () => {
         );
 
         dispatch(setMessages(res.data));
+
       } catch (error) {
         console.log(error);
-      }finally{
+      } finally {
         // Stop loading (runs whether request succeeds or fails)
         dispatch(setLoading(false));
       }
