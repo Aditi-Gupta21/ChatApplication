@@ -17,7 +17,7 @@ const conversationSlice = createSlice({
     },
 
     updateConversation:(state, action)=>{
-      const {receiverId, message, createdAt} = action.payload;
+      const {receiverId, message, createdAt, incrementUnread = false, } = action.payload;
       
       const index = state.conversations.findIndex((conversation) => conversation.user._id === receiverId);
 
@@ -28,15 +28,28 @@ const conversationSlice = createSlice({
         conversation.lastMessage = message;
         conversation.lastMessageTime = createdAt;
 
+        if(incrementUnread){
+          conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+        }
+
         // Move updated conversation to the top
         state.conversations.splice(index,1);
         state.conversations.unshift(conversation);
       }
     },
     
+    resetUnreadCount:(state,action)=>{
+      const receiverId = action.payload;
+
+      const conversation = state.conversations.find((conversation)=> conversation.user._id === receiverId);
+
+      if(conversation){
+        conversation.unreadCount = 0;
+      }
+    }
   }
 });
 
 
-export const {setConversations, setConversationLoading, updateConversation} = conversationSlice.actions;
+export const {setConversations, setConversationLoading, updateConversation, resetUnreadCount } = conversationSlice.actions;
 export default conversationSlice.reducer;

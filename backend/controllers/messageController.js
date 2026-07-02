@@ -36,6 +36,14 @@ export const sendMessage = async(req, res)=>{
       gotConversation.message.push(newMessage._id);
       gotConversation.lastMessage = newMessage.message;
       gotConversation.lastMessageTime = newMessage.createdAt;
+
+      const receiverUnread = gotConversation.unreadCounts?.find( 
+        unread => unread.user.toString() === receiverId
+      );
+
+      if(receiverUnread){
+        receiverUnread.count += 1;
+      }
     }
     await Promise.all([gotConversation.save(), newMessage.save()])
 
@@ -63,10 +71,15 @@ export const getMessage = async(req,res)=>{
     const receiverId = req.params.id;
     const conversation = await Conversation.findOne({
       participants:{$all: [senderId, receiverId]}
-    }).populate("message");
-    
+    });
 
-    return res.status(200).json(conversation?.message);
+    if(!conversation){
+      return res.status(200).json([]);
+    }
+
+    await conversation.populate("message");
+
+    return res.status(200).json(conversation.message);
     
   } catch (error) {
     return res.status(401).json({message : error.message});

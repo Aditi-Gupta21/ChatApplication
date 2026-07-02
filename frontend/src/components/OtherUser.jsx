@@ -1,5 +1,7 @@
+import axios from 'axios'
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedUser } from "../redux/userSlice";
+import { resetUnreadCount } from '../redux/conversationSlice'
 
 const OtherUser = ({ conversation }) => {
   const user = conversation.user;
@@ -11,8 +13,32 @@ const OtherUser = ({ conversation }) => {
 
   const isOnline = onlineUsers?.includes(user._id);
 
-  const selectedUserHandler = () => {
-    dispatch(setSelectedUser(user));
+  const selectedUserHandler = async () => {
+
+    if (selectedUser?._id === user._id) return;
+
+    try {
+      dispatch(setSelectedUser(user));
+
+      if (conversation.unreadCount > 0) {
+        dispatch(resetUnreadCount(user._id));
+
+        try {
+          await axios.patch(
+            `http://localhost:9000/api/v1/conversation/${user._id}/read`,
+            {},
+            {
+              withCredentials: true,
+            }
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -46,12 +72,19 @@ const OtherUser = ({ conversation }) => {
             </span>
           </div>
 
-          <p className="text-sm text-gray-300 truncate">
-            {conversation.lastMessage || "Start a conversation..."}
-          </p>
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-300 truncate">
+              {conversation.lastMessage || "Start a conversation..."}
+            </p>
+
+            {conversation.unreadCount > 0 && (
+              <div className="ml-2 min-w-5 h-5 px-1 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
+                {conversation.unreadCount}
+              </div>
+            )}
+
+          </div>
         </div>
-
-
       </div>
 
       <div className="divider my-0 py-0 h-1"></div>
