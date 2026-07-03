@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.route("/sidebar").get(Authenticated,getSidebarConversations);
 
-router.route("/:id/read").patch(Authenticated, markConversationAsRead);
+router.route("/:id/read").patch((req, res, next) => {
+  next();
+}, Authenticated, markConversationAsRead);
 
 export default router;

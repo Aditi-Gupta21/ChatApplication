@@ -13,10 +13,20 @@ const messageSlice = createSlice({
     },
     setLoading:(state,action)=>{
       state.loading = action.payload;
-    }
+    },
+    markMessagesAsSeen:(state,action) => {
+      const {messageIds} = action.payload;
+
+      state.messages.forEach((message)=>{
+        if(messageIds.includes(message._id)){
+          message.seen = true;
+        }
+      });
+    },
+
   }
 });
 
 
-export const {setMessages, setLoading} = messageSlice.actions;
+export const {setMessages, setLoading, markMessagesAsSeen} = messageSlice.actions;
 export default messageSlice.reducer;

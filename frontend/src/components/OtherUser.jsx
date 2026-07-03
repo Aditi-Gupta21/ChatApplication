@@ -24,6 +24,7 @@ const OtherUser = ({ conversation }) => {
         dispatch(resetUnreadCount(user._id));
 
         try {
+        
           await axios.patch(
             `http://localhost:9000/api/v1/conversation/${user._id}/read`,
             {},

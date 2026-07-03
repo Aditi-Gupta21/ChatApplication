@@ -32,21 +32,26 @@ const Message = ({ message }) => {
           </div>
         </div>
 
-        <div className="chat-header">
+        <div className="chat-header flex items-center gap-1">
           <time className="text-xs opacity-60">
-            {new Date(message.createdAt).toLocaleTimeString([],{
-              hour:"2-digit",
+            {new Date(message.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
               minute: "2-digit",
             })}
           </time>
+
+          {isSender && (
+            <span className="text-xs">
+              {message.seen ? "✓✓" : "✓"}
+            </span>
+          )}
         </div>
 
         <div
-          className={`chat-bubble ${
-            isSender
+          className={`chat-bubble ${isSender
               ? "bg-black text-white"
               : "bg-white text-black"
-          }`}
+            }`}
         >
           {message?.message}
         </div>

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 
 import { setIsTyping } from "../redux/userSlice";
-import { setMessages } from "../redux/messageSlice";
+import { setMessages, markMessagesAsSeen } from "../redux/messageSlice";
 import { updateConversation } from "../redux/conversationSlice";
 
 const useSocketEvents = () => {
@@ -21,16 +21,10 @@ const useSocketEvents = () => {
     // Typing
     // =========================
     const handleTyping = ({ senderId }) => {
-      console.log("Typing event received");
-      console.log("senderId:", senderId);
-      console.log("selectedUser:", selectedUser?._id);
 
       if (selectedUser?._id !== senderId) {
-        console.log("Ignoring typing event");
         return;
       }
-
-      console.log("Showing typing indicator");
 
       dispatch(setIsTyping(true));
 
@@ -45,7 +39,6 @@ const useSocketEvents = () => {
     // Stop Typing
     // =========================
     const handleStopTyping = ({ senderId }) => {
-      console.log("Stop typing:", senderId);
 
       if (selectedUser?._id !== senderId) return;
 
@@ -63,7 +56,7 @@ const useSocketEvents = () => {
           receiverId: newMessage.senderId,
           message: newMessage.message,
           createdAt: newMessage.createdAt,
-          incrementUnread:selectedUser?._id !== newMessage.senderId,
+          incrementUnread: selectedUser?._id !== newMessage.senderId,
         })
       );
 
@@ -75,9 +68,21 @@ const useSocketEvents = () => {
       }
     };
 
+    // =========================
+    // Messages Seen
+    // =========================
+    const handleMessagesSeen = ({ messageIds }) => {
+      dispatch(
+        markMessagesAsSeen({
+          messageIds,
+        })
+      );
+    };
+
     socket.on("typing", handleTyping);
     socket.on("stopTyping", handleStopTyping);
     socket.on("newMessage", handleNewMessage);
+    socket.on("messagesSeen", handleMessagesSeen);
 
     return () => {
       clearTimeout(typingTimer);
@@ -85,6 +90,7 @@ const useSocketEvents = () => {
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
       socket.off("newMessage", handleNewMessage);
+      socket.off("messagesSeen", handleMessagesSeen);
     };
   }, [socket, dispatch, selectedUser, store]);
 };
