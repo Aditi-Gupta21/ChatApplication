@@ -18,7 +18,11 @@ const messageModel = new mongoose.Schema({
   seen:{
     type:Boolean,
     default:false,
-  }
+  }, 
+  edited:{
+    type : Boolean,
+    default:false,
+  },
 
 }, {timestamps:true});
 

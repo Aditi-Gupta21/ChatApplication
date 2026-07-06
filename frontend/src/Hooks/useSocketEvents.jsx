@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 
 import { setIsTyping } from "../redux/userSlice";
-import { setMessages, markMessagesAsSeen } from "../redux/messageSlice";
+import { setMessages, markMessagesAsSeen, editMessage } from "../redux/messageSlice";
 import { updateConversation } from "../redux/conversationSlice";
 
 const useSocketEvents = () => {
@@ -79,10 +79,22 @@ const useSocketEvents = () => {
       );
     };
 
+    const handleMessageEdited = ({ updatedMessage }) => {
+      dispatch(editMessage(updatedMessage));
+      dispatch(
+        updateConversation({
+          receiverId: updatedMessage.senderId,
+          message: updatedMessage.message,
+          edited: true,
+        })
+      );
+    }
+
     socket.on("typing", handleTyping);
     socket.on("stopTyping", handleStopTyping);
     socket.on("newMessage", handleNewMessage);
     socket.on("messagesSeen", handleMessagesSeen);
+    socket.on("messageEdited", handleMessageEdited);
 
     return () => {
       clearTimeout(typingTimer);
@@ -91,6 +103,7 @@ const useSocketEvents = () => {
       socket.off("stopTyping", handleStopTyping);
       socket.off("newMessage", handleNewMessage);
       socket.off("messagesSeen", handleMessagesSeen);
+      socket.off("messageEdited", handleMessageEdited);
     };
   }, [socket, dispatch, selectedUser, store]);
 };
