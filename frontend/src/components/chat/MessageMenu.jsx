@@ -8,6 +8,7 @@ const MessageMenu = ({
   menuRef,
   onEdit,
   onDelete,
+  onForward,
 }) => {
   if (!canShowMenu) return null;
 
@@ -22,7 +23,7 @@ const MessageMenu = ({
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 mt-2 w-40 rounded-md bg-zinc-800 shadow-lg z-50">
+        <div className="absolute bottom-full right-0 mt-2 w-40 rounded-md bg-zinc-800 shadow-lg z-50">
 
           <button
             onClick={onEdit}
@@ -38,6 +39,13 @@ const MessageMenu = ({
           >
             <MdDelete />
             Delete
+          </button>
+
+          <button
+            onClick={onForward}
+            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-zinc-700"
+          >
+            📤 Forward
           </button>
 
         </div>

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { editMessage, deleteMessage, removeMessage } from "../redux/messageSlice";
 import MessageMenu from "./chat/MessageMenu";
 import DeleteMessageModal from "./chat/DeleteMessageModal";
+import ForwardMessageModal from './chat/ForwardMessageModal'
 import EditMessageInput from "./chat/EditMessageInput";
 import { toast } from 'react-hot-toast'
 import { updateConversation } from "../redux/conversationSlice";
@@ -21,10 +22,17 @@ const Message = ({ message }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showForwardModal, setShowForwardModal] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [isForwarding, setIsForwarding] = useState(false);
 
 
   const { authUser, selectedUser } = useSelector(
     (store) => store.user
+  );
+
+  const { conversations } = useSelector(
+    (store) => store.conversation
   );
 
   const isSender = authUser?._id === message.senderId;
@@ -141,7 +149,7 @@ const Message = ({ message }) => {
         updateConversation({
           receiverId: selectedUser._id,
           message: "🚫 This message was deleted",
-          edited:true,
+          edited: true,
         })
       );
 
@@ -185,6 +193,44 @@ const Message = ({ message }) => {
     }
   };
 
+  const handleForward = async () => {
+    if (selectedUsers.length === 0) return;
+
+    setIsForwarding(true);
+
+    try {
+      await axios.post(
+        "http://localhost:9000/api/v1/message/forward",
+        {
+          receiverIds: selectedUsers,
+          message: message.message,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      dispatch(
+        updateConversation({
+          receiverId: selectedUsers[0],
+          message: message.message,
+          createdAt: new Date().toISOString(),
+        })
+      );
+
+      toast.success("Message forwarded");
+
+      setShowForwardModal(false);
+      setSelectedUsers([]);
+
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to forward message"
+      );
+    } finally {
+      setIsForwarding(false);
+    }
+  };
+
   return (
     <div ref={scroll}>
       <div className={`chat ${isSender ? "chat-end" : "chat-start"}`}>
@@ -224,6 +270,10 @@ const Message = ({ message }) => {
             showMenu={showMenu}
             setShowMenu={setShowMenu}
             menuRef={menuRef}
+            onForward={() => {
+              setShowForwardModal(true);
+              setShowMenu(false);
+            }}
             onEdit={() => {
               setEditedText(message.message);
               setIsEditing(true);
@@ -265,6 +315,12 @@ const Message = ({ message }) => {
                 </p>
               ) : (
                 <>
+                  {message.forwarded && (
+                    <p className="text-[10px] italic opacity-70 mb-1">
+                      ↪ Forwarded
+                    </p>
+                  )}
+
                   <p>{message.message}</p>
 
                   {message.edited && (
@@ -286,6 +342,19 @@ const Message = ({ message }) => {
         onDelete={handleDelete}
         onDeleteForMe={handleDeleteForMe}
         isDeleting={isDeleting}
+      />
+      <ForwardMessageModal
+        open={showForwardModal}
+        onClose={() => {
+          setShowForwardModal(false);
+          setSelectedUsers([]);
+        }}
+        conversations={conversations}
+        selectedUsers={selectedUsers}
+        setSelectedUsers={setSelectedUsers}
+        onForward={handleForward}
+        isForwarding={isForwarding}
+        currentChatUserId={selectedUser._id}
       />
     </div>
   );

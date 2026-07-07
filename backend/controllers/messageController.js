@@ -242,3 +242,87 @@ export const deleteMessageForMe = async (req, res) => {
     });
   }
 };
+
+export const forwardMessage = async (req, res) => {
+  try {
+    const senderId = req.id;
+    const { receiverIds, message } = req.body;
+
+    if (!receiverIds?.length || !message?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Receiver and message are required",
+      });
+    }
+
+    for (const receiverId of receiverIds) {
+
+      // Find conversation
+      let gotConversation = await Conversation.findOne({
+        participants: { $all: [senderId, receiverId] },
+      });
+
+      // Create conversation if not exists
+      if (!gotConversation) {
+        gotConversation = await Conversation.create({
+          participants: [senderId, receiverId],
+          unreadCounts: [
+            {
+              user: senderId,
+              count: 0,
+            },
+            {
+              user: receiverId,
+              count: 0,
+            },
+          ],
+        });
+      }
+
+      // Create forwarded message
+      const newMessage = await Message.create({
+        senderId,
+        receiverId,
+        message,
+        forwarded:true,
+      });
+
+      gotConversation.message.push(newMessage._id);
+      gotConversation.lastMessage = newMessage.message;
+      gotConversation.lastMessageTime = newMessage.createdAt;
+
+      const receiverUnread = gotConversation.unreadCounts.find(
+        (unread) => unread.user.toString() === receiverId.toString()
+      );
+
+      if (receiverUnread) {
+        receiverUnread.count += 1;
+      }
+
+      await Promise.all([
+        gotConversation.save(),
+        newMessage.save(),
+      ]);
+
+      // Socket
+      const receiverSocketId = getReceiverSocketId(
+        receiverId.toString()
+      );
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Message forwarded successfully",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

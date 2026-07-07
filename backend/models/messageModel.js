@@ -37,7 +37,10 @@ const messageModel = new mongoose.Schema({
       ref: "User",
     },
   ],
-
+  forwarded: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 export const Message = mongoose.model("Message", messageModel);
