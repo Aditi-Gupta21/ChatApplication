@@ -64,7 +64,6 @@ export const sendMessage = async (req, res) => {
   }
 }
 
-
 export const getMessage = async (req, res) => {
   try {
     const senderId = req.id;
@@ -79,7 +78,14 @@ export const getMessage = async (req, res) => {
 
     await conversation.populate("message");
 
-    return res.status(200).json(conversation.message);
+    const visibleMessages = conversation.message.filter(
+      (msg) =>
+        !msg.deletedFor.some(
+          (user) => user.toString() === senderId.toString()
+        )
+    );
+
+    return res.status(200).json(visibleMessages);
 
   } catch (error) {
     return res.status(401).json({ message: error.message });
@@ -151,3 +157,88 @@ export const editMessage = async (req, res) => {
     });
   }
 }
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const userId = req.id;
+    const messageId = req.params.messageId;
+
+    const existingMessage = await Message.findById(messageId);
+
+    if (!existingMessage) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found",
+      });
+    }
+
+    if (existingMessage.senderId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own messages",
+      });
+    }
+
+    existingMessage.deleted = true;
+    existingMessage.deletedForEveryone = true;
+    existingMessage.message = "This message was deleted";
+    existingMessage.edited = false;
+
+    await existingMessage.save();
+
+    const receiverSocketId = getReceiverSocketId(
+      existingMessage.receiverId.toString()
+    );
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageDeleted", {
+        deletedMessage: existingMessage,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Message deleted successfully",
+      deletedMessage: existingMessage,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteMessageForMe = async (req, res) => {
+  try {
+    const userId = req.id;
+    const messageId = req.params.messageId;
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found",
+      });
+    }
+
+    if (!message.deletedFor.includes(userId)) {
+      message.deletedFor.push(userId);
+      await message.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Message deleted for you",
+      messageId,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

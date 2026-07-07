@@ -33,10 +33,23 @@ const messageSlice = createSlice({
         state.messages[index] = updatedMessage;
       }
     },
+    deleteMessage: (state, action) => {
+      const deleteMessage = action.payload;
 
+      const index = state.messages.findIndex((msg) => msg._id === deleteMessage._id);
+
+      if (index !== -1) {
+        state.messages[index] = deleteMessage;
+      }
+    },
+    removeMessage: (state, action) => {
+      state.messages = state.messages.filter(
+        (msg) => msg._id !== action.payload
+      );
+    },
   }
 });
 
 
-export const { setMessages, setLoading, markMessagesAsSeen, editMessage } = messageSlice.actions;
+export const { setMessages, setLoading, markMessagesAsSeen, editMessage, deleteMessage,removeMessage } = messageSlice.actions;
 export default messageSlice.reducer;

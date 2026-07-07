@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 
 import { setIsTyping } from "../redux/userSlice";
-import { setMessages, markMessagesAsSeen, editMessage } from "../redux/messageSlice";
+import { setMessages, markMessagesAsSeen, editMessage, deleteMessage as deleteMessageAction, } from "../redux/messageSlice";
 import { updateConversation } from "../redux/conversationSlice";
 
 const useSocketEvents = () => {
@@ -79,6 +79,9 @@ const useSocketEvents = () => {
       );
     };
 
+    // =========================
+    // Edit Messages 
+    // =========================
     const handleMessageEdited = ({ updatedMessage }) => {
       dispatch(editMessage(updatedMessage));
       dispatch(
@@ -90,11 +93,28 @@ const useSocketEvents = () => {
       );
     }
 
+    // =========================
+    // Delete Messages
+    // =========================
+
+    const handleMessageDeleted = ({ deletedMessage }) => {
+      dispatch(deleteMessageAction(deletedMessage));
+
+      dispatch(
+        updateConversation({
+          receiverId: deletedMessage.senderId,
+          message: "🚫 This message was deleted",
+          edited: true,
+        })
+      );
+    };
+
     socket.on("typing", handleTyping);
     socket.on("stopTyping", handleStopTyping);
     socket.on("newMessage", handleNewMessage);
     socket.on("messagesSeen", handleMessagesSeen);
     socket.on("messageEdited", handleMessageEdited);
+    socket.on("messageDeleted", handleMessageDeleted);
 
     return () => {
       clearTimeout(typingTimer);
@@ -104,6 +124,7 @@ const useSocketEvents = () => {
       socket.off("newMessage", handleNewMessage);
       socket.off("messagesSeen", handleMessagesSeen);
       socket.off("messageEdited", handleMessageEdited);
+      socket.off("messageDeleted", handleMessageDeleted);
     };
   }, [socket, dispatch, selectedUser, store]);
 };

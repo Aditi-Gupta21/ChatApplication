@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { editMessage } from "../redux/messageSlice";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { MdEdit } from "react-icons/md";
+import { editMessage, deleteMessage, removeMessage } from "../redux/messageSlice";
+import MessageMenu from "./chat/MessageMenu";
+import DeleteMessageModal from "./chat/DeleteMessageModal";
+import EditMessageInput from "./chat/EditMessageInput";
 import { toast } from 'react-hot-toast'
 import { updateConversation } from "../redux/conversationSlice";
+
+
 
 const Message = ({ message }) => {
   const scroll = useRef();
@@ -16,6 +19,9 @@ const Message = ({ message }) => {
   const [editedText, setEditedText] = useState(message.message);
   const [showMenu, setShowMenu] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
   const { authUser, selectedUser } = useSelector(
     (store) => store.user
@@ -23,10 +29,8 @@ const Message = ({ message }) => {
 
   const isSender = authUser?._id === message.senderId;
 
-  const canEdit =
-    isSender &&
-    Date.now() - new Date(message.createdAt).getTime() <=
-    5 * 60 * 1000;
+  const canShowMenu =
+    isSender && !message.deletedForEveryone;
 
   useEffect(() => {
     scroll.current?.scrollIntoView({
@@ -65,6 +69,15 @@ const Message = ({ message }) => {
     }
   };
 
+  const scrollToMessage = () => {
+    setTimeout(() => {
+      scroll.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 0);
+  };
+
   const handleSave = async () => {
     if (!editedText.trim()) {
       setEditedText(message.message);
@@ -96,7 +109,6 @@ const Message = ({ message }) => {
         updateConversation({
           receiverId: selectedUser._id,
           message: res.data.updatedMessage.message,
-          edited: true,
         })
       );
 
@@ -108,6 +120,68 @@ const Message = ({ message }) => {
       );
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      const res = await axios.patch(
+        `http://localhost:9000/api/v1/message/delete/${message._id}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      dispatch(deleteMessage(res.data.deletedMessage));
+
+      dispatch(
+        updateConversation({
+          receiverId: selectedUser._id,
+          message: "🚫 This message was deleted",
+          edited:true,
+        })
+      );
+
+      setShowMenu(false);
+      setShowDeleteModal(false);
+
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to delete message"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteForMe = async () => {
+    setIsDeleting(true);
+
+    try {
+      const res = await axios.patch(
+        `http://localhost:9000/api/v1/message/deleteforme/${message._id}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      dispatch(removeMessage(res.data.messageId));
+
+      setShowDeleteModal(false);
+      setShowMenu(false);
+
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to delete message"
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -145,43 +219,24 @@ const Message = ({ message }) => {
             </span>
           )}
 
-          {canEdit && (
-            <div ref={menuRef} className="relative">
+          <MessageMenu
+            canShowMenu={canShowMenu}
+            showMenu={showMenu}
+            setShowMenu={setShowMenu}
+            menuRef={menuRef}
+            onEdit={() => {
+              setEditedText(message.message);
+              setIsEditing(true);
+              setShowMenu(false);
+              scrollToMessage();
+            }}
 
-              <button
-                onClick={() => setShowMenu((prev) => !prev)}
-                className="p-1 rounded hover:bg-zinc-700 transition-colors"
-              >
-                <BsThreeDotsVertical className="text-sm" />
-              </button>
-
-              {showMenu && (
-                <div className="absolute right-0 mt-2 w-36 rounded-md bg-zinc-800 shadow-lg z-50">
-
-                  <button
-                    onClick={() => {
-                      setEditedText(message.message);
-                      setIsEditing(true);
-                      setShowMenu(false);
-
-                      setTimeout(() => {
-                        scroll.current?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
-                      }, 0);
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-zinc-700"
-                  >
-                    <MdEdit />
-                    Edit
-                  </button>
-
-                </div>
-              )}
-
-            </div>
-          )}
+            onDelete={() => {
+              setShowDeleteModal(true);
+              setShowMenu(false);
+              scrollToMessage();
+            }}
+          />
 
         </div>
 
@@ -193,56 +248,45 @@ const Message = ({ message }) => {
             }`}
         >
           {isEditing ? (
-            <div className="flex flex-col gap-2 min-w-[250px]">
-
-              <textarea
-                value={editedText}
-                onChange={(e) => setEditedText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                autoFocus
-                disabled={isSaving}
-                rows={2}
-                className="w-full bg-transparent outline-none border border-gray-500 rounded-lg px-3 py-2 text-inherit resize-none"
-              />
-
-              <div className="flex justify-end gap-2">
-
-                <button
-                  onClick={() => {
-                    setEditedText(message.message);
-                    setIsEditing(false);
-                  }}
-                  disabled={isSaving}
-                  className="px-3 py-1 rounded-md text-xs bg-zinc-700 hover:bg-zinc-600 transition"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-3 py-1 rounded-md text-xs bg-green-600 hover:bg-green-500 transition"
-                >
-                  {isSaving ? "Saving..." : "Save"}
-                </button>
-
-              </div>
-
-            </div>
+            <EditMessageInput
+              editedText={editedText}
+              setEditedText={setEditedText}
+              handleSave={handleSave}
+              isSaving={isSaving}
+              originalMessage={message.message}
+              handleKeyDown={handleKeyDown}
+              onCancel={() => setIsEditing(false)}
+            />
           ) : (
             <>
-              <p>{message.message}</p>
-
-              {message.edited && (
-                <p className="mt-1 text-[10px] italic opacity-70">
-                  edited
+              {message.deletedForEveryone ? (
+                <p className="italic opacity-60">
+                  🚫 This message was deleted
                 </p>
+              ) : (
+                <>
+                  <p>{message.message}</p>
+
+                  {message.edited && (
+                    <p className="mt-1 text-[10px] italic opacity-70">
+                      edited
+                    </p>
+                  )}
+                </>
               )}
             </>
           )}
+
         </div>
 
       </div>
+      <DeleteMessageModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={handleDelete}
+        onDeleteForMe={handleDeleteForMe}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

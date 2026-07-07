@@ -1,13 +1,20 @@
 import express from "express";
 import Authenticated from "../middleware/auth.js";
-import {getMessage, sendMessage, editMessage} from "../controllers/messageController.js";
+import {
+  sendMessage,
+  getMessage,
+  editMessage,
+  deleteMessage,
+  deleteMessageForMe,
+} from "../controllers/messageController.js";
 
 const router = express.Router();
 
-router.route("/send/:id").post(Authenticated,sendMessage);
+router.post("/send/:id", Authenticated, sendMessage);
+router.get("/:id", Authenticated, getMessage);
 
-router.route("/:id").get(Authenticated, getMessage);
-
-router.route("/edit/:messageId").patch(Authenticated,editMessage);
+router.patch("/edit/:messageId", Authenticated, editMessage);
+router.patch("/delete/:messageId", Authenticated, deleteMessage);
+router.patch("/deleteforme/:messageId", Authenticated, deleteMessageForMe);
 
 export default router;
