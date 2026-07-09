@@ -1,31 +1,32 @@
-import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
+// React
+import React, { useRef, useState } from "react";
+
+// Redux
 import { useDispatch, useSelector } from "react-redux";
+
+// Redux Actions
 import { editMessage, deleteMessage, removeMessage } from "../redux/messageSlice";
-import MessageMenu from "./chat/MessageMenu";
-import DeleteMessageModal from "./chat/DeleteMessageModal";
-import ForwardMessageModal from './chat/ForwardMessageModal'
-import EditMessageInput from "./chat/EditMessageInput";
-import { toast } from 'react-hot-toast'
 import { updateConversation } from "../redux/conversationSlice";
 
+// Custom Hooks
+import useMessageEffects from "../Hooks/useMessageEffects";
+import useMessageActions from "../Hooks/useMessageActions";
+
+// Components
+import MessageBubble from "./chat/MessageBubble";
+import DeleteMessageModal from "./chat/DeleteMessageModal";
+import ForwardMessageModal from "./chat/ForwardMessageModal";
 
 
 const Message = ({ message }) => {
+  // ======================= REFS =======================
+
   const scroll = useRef();
-  const menuRef = useRef(null);
+  const menuRef = useRef();
+
+  // ======================= REDUX =======================
+
   const dispatch = useDispatch();
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState(message.message);
-  const [showMenu, setShowMenu] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showForwardModal, setShowForwardModal] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [isForwarding, setIsForwarding] = useState(false);
-
 
   const { authUser, selectedUser } = useSelector(
     (store) => store.user
@@ -35,307 +36,157 @@ const Message = ({ message }) => {
     (store) => store.conversation
   );
 
-  const isSender = authUser?._id === message.senderId;
+  const { otherUsers } = useSelector(
+    (store) => store.user
+  );
+
+  // ======================= LOCAL STATE =======================
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(message.message);
+
+  const [showMenu, setShowMenu] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] =
+    useState(false);
+
+  const [showForwardModal, setShowForwardModal] =
+    useState(false);
+
+  const [selectedUsers, setSelectedUsers] =
+    useState([]);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isForwarding, setIsForwarding] = useState(false);
+
+  // ======================= DERIVED VALUES =======================
+
+  const isSender =
+    authUser?._id === message.senderId;
+
+  const avatar = isSender
+    ? authUser?.profilePhoto
+    : selectedUser?.profilePhoto;
 
   const canShowMenu =
-    isSender && !message.deletedForEveryone;
+    isSender &&
+    !message.deletedForEveryone;
 
-  useEffect(() => {
-    scroll.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [message]);
+  // ======================= CUSTOM HOOKS =======================
 
-  useEffect(() => {
+  useMessageEffects({
+    scroll,
+    message,
+    setEditedText,
+    menuRef,
+    setShowMenu,
+  });
+
+  const {
+    scrollToMessage,
+    handleKeyDown,
+    handleSave,
+    handleDelete,
+    handleDeleteForMe,
+    handleForward
+  } = useMessageActions({
+    message,
+    selectedUser,
+    selectedUsers,
+
+    editedText,
+    setEditedText,
+
+    setIsEditing,
+    setShowMenu,
+
+    setShowDeleteModal,
+
+    setShowForwardModal,
+    setSelectedUsers,
+
+    setIsSaving,
+    setIsDeleting,
+    setIsForwarding,
+
+    dispatch,
+
+    editMessage,
+    deleteMessage,
+    removeMessage,
+    updateConversation,
+
+    scroll,
+  });
+
+  // ======================= UI HANDLERS =======================
+  const openEditMode = () => {
     setEditedText(message.message);
-  }, [message.message]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, []);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      setEditedText(message.message);
-      setIsEditing(false);
-      return;
-    }
-
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    }
+    setIsEditing(true);
+    setShowMenu(false);
+    scrollToMessage();
   };
 
-  const scrollToMessage = () => {
-    setTimeout(() => {
-      scroll.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 0);
+  const openDeleteModal = () => {
+    setShowDeleteModal(true);
+    setShowMenu(false);
+    scrollToMessage();
   };
 
-  const handleSave = async () => {
-    if (!editedText.trim()) {
-      setEditedText(message.message);
-      setIsEditing(false);
-      return;
-    }
-
-    if (editedText.trim() === message.message) {
-      setIsEditing(false);
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/edit/${message._id}`,
-        {
-          message: editedText,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      dispatch(editMessage(res.data.updatedMessage));
-
-      dispatch(
-        updateConversation({
-          receiverId: selectedUser._id,
-          message: res.data.updatedMessage.message,
-        })
-      );
-
-      setIsEditing(false);
-      setShowMenu(false);
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to edit message"
-      );
-    } finally {
-      setIsSaving(false);
-    }
+  const openForwardModal = () => {
+    setShowForwardModal(true);
+    setShowMenu(false);
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-
-    try {
-      const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/delete/${message._id}`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      dispatch(deleteMessage(res.data.deletedMessage));
-
-      dispatch(
-        updateConversation({
-          receiverId: selectedUser._id,
-          message: "🚫 This message was deleted",
-          edited: true,
-        })
-      );
-
-      setShowMenu(false);
-      setShowDeleteModal(false);
-
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-        "Failed to delete message"
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteForMe = async () => {
-    setIsDeleting(true);
-
-    try {
-      const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/deleteforme/${message._id}`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      dispatch(removeMessage(res.data.messageId));
-
-      setShowDeleteModal(false);
-      setShowMenu(false);
-
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-        "Failed to delete message"
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleForward = async () => {
-    if (selectedUsers.length === 0) return;
-
-    setIsForwarding(true);
-
-    try {
-      await axios.post(
-        "http://localhost:9000/api/v1/message/forward",
-        {
-          receiverIds: selectedUsers,
-          message: message.message,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      dispatch(
-        updateConversation({
-          receiverId: selectedUsers[0],
-          message: message.message,
-          createdAt: new Date().toISOString(),
-        })
-      );
-
-      toast.success("Message forwarded");
-
-      setShowForwardModal(false);
-      setSelectedUsers([]);
-
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to forward message"
-      );
-    } finally {
-      setIsForwarding(false);
-    }
-  };
 
   return (
     <div ref={scroll}>
-      <div className={`chat ${isSender ? "chat-end" : "chat-start"}`}>
+      <div
+        className={`mb-4 flex items-end gap-2 md:gap-3 ${isSender ? "justify-end" : "justify-start"
+          }`}
+      >
+        {/* Receiver Avatar */}
+        {!isSender && (
+          <img
+            src={avatar}
+            alt="avatar"
+            className="h-8 w-8 shrink-0 rounded-full border border-[var(--color-border)] object-cover md:h-10 md:w-10"
+          />
+        )}
 
-        {/* Avatar */}
-        <div className="chat-image avatar">
-          <div className="w-10 rounded-full">
-            <img
-              src={
-                isSender
-                  ? authUser?.profilePhoto
-                  : selectedUser?.profilePhoto
-              }
-              alt="avatar"
-            />
-          </div>
-        </div>
-
-        {/* Header */}
-        <div className="chat-header flex items-center gap-2">
-
-          <time className="text-xs opacity-60">
-            {new Date(message.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </time>
-
-          {isSender && (
-            <span className="text-xs">
-              {message.seen ? "✓✓" : "✓"}
-            </span>
-          )}
-
-          <MessageMenu
+        {/* Message Content */}
+        <div className="max-w-[82%] md:max-w-[70%]">
+          <MessageBubble
+            isSender={isSender}
+            message={message}
             canShowMenu={canShowMenu}
             showMenu={showMenu}
             setShowMenu={setShowMenu}
             menuRef={menuRef}
-            onForward={() => {
-              setShowForwardModal(true);
-              setShowMenu(false);
-            }}
-            onEdit={() => {
-              setEditedText(message.message);
-              setIsEditing(true);
-              setShowMenu(false);
-              scrollToMessage();
-            }}
-
-            onDelete={() => {
-              setShowDeleteModal(true);
-              setShowMenu(false);
-              scrollToMessage();
-            }}
+            onForward={openForwardModal}
+            onEdit={openEditMode}
+            onDelete={openDeleteModal}
+            isEditing={isEditing}
+            editedText={editedText}
+            setEditedText={setEditedText}
+            handleSave={handleSave}
+            isSaving={isSaving}
+            handleKeyDown={handleKeyDown}
+            onCancel={() => setIsEditing(false)}
           />
-
         </div>
 
-        {/* Message Bubble */}
-        <div
-          className={`chat-bubble ${isSender
-            ? "bg-black text-white"
-            : "bg-white text-black"
-            }`}
-        >
-          {isEditing ? (
-            <EditMessageInput
-              editedText={editedText}
-              setEditedText={setEditedText}
-              handleSave={handleSave}
-              isSaving={isSaving}
-              originalMessage={message.message}
-              handleKeyDown={handleKeyDown}
-              onCancel={() => setIsEditing(false)}
-            />
-          ) : (
-            <>
-              {message.deletedForEveryone ? (
-                <p className="italic opacity-60">
-                  🚫 This message was deleted
-                </p>
-              ) : (
-                <>
-                  {message.forwarded && (
-                    <p className="text-[10px] italic opacity-70 mb-1">
-                      ↪ Forwarded
-                    </p>
-                  )}
-
-                  <p>{message.message}</p>
-
-                  {message.edited && (
-                    <p className="mt-1 text-[10px] italic opacity-70">
-                      edited
-                    </p>
-                  )}
-                </>
-              )}
-            </>
-          )}
-
-        </div>
-
+        {/* Sender Avatar */}
+        {isSender && (
+          <img
+            src={avatar}
+            alt="avatar"
+            className="h-8 w-8 shrink-0 rounded-full border border-[var(--color-border)] object-cover md:h-10 md:w-10"
+          />
+        )}
       </div>
+
       <DeleteMessageModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -343,12 +194,14 @@ const Message = ({ message }) => {
         onDeleteForMe={handleDeleteForMe}
         isDeleting={isDeleting}
       />
+
       <ForwardMessageModal
         open={showForwardModal}
         onClose={() => {
           setShowForwardModal(false);
           setSelectedUsers([]);
         }}
+        users={otherUsers}
         conversations={conversations}
         selectedUsers={selectedUsers}
         setSelectedUsers={setSelectedUsers}
@@ -356,8 +209,10 @@ const Message = ({ message }) => {
         isForwarding={isForwarding}
         currentChatUserId={selectedUser._id}
       />
+
     </div>
   );
+
 };
 
 export default Message;

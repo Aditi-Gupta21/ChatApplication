@@ -86,6 +86,7 @@ export const markConversationAsRead = async (req, res) => {
       "_id"
     );
 
+
     // Mark them seen
     await Message.updateMany(
       {
@@ -111,7 +112,11 @@ export const markConversationAsRead = async (req, res) => {
     }
 
     await conversation.save();
+    console.log(
+      unseenMessages.map((msg) => msg._id)
+    );
 
+    
     // Notify sender
     const senderSocketId = getReceiverSocketId(otherUserId);
 

@@ -45,9 +45,9 @@ export const register = async (req, res) => {
 
     // DiceBear Avatar
     const profilePhoto =
-  gender === "male"
-    ? `https://api.dicebear.com/9.x/adventurer/svg?seed=${userName}`
-    : `https://api.dicebear.com/9.x/notionists/svg?seed=${userName}`;
+      gender === "male"
+        ? `https://api.dicebear.com/9.x/adventurer/svg?seed=${userName}`
+        : `https://api.dicebear.com/9.x/notionists/svg?seed=${userName}`;
 
     await User.create({
       fullName,
@@ -125,6 +125,7 @@ export const login = async (req, res) => {
         _id: user._id,
         fullName: user.fullName,
         userName: user.userName,
+        gender: user.gender,
         profilePhoto: user.profilePhoto,
       });
   } catch (error) {
@@ -163,6 +164,57 @@ export const getOtherUser = async (req, res) => {
     }).select("-password");
 
     return res.status(200).json(otherUser);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    const { fullName, generateAvatar } = req.body;
+
+    const user = await User.findById(loggedInUserId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update full name if provided
+    if (fullName && fullName.trim()) {
+      user.fullName = fullName.trim();
+    }
+
+    // Generate a new avatar
+    if (generateAvatar) {
+      const seed = `${user.userName}-${Date.now()}`;
+
+      user.profilePhoto =
+        user.gender === "male"
+          ? `https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}`
+          : `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}`;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        userName: user.userName,
+        gender: user.gender,
+        profilePhoto: user.profilePhoto,
+      },
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

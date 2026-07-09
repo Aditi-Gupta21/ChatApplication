@@ -1,10 +1,11 @@
-import axios from 'axios'
+import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedUser } from "../redux/userSlice";
-import { resetUnreadCount } from '../redux/conversationSlice'
+import { resetUnreadCount } from "../redux/conversationSlice";
 
 const OtherUser = ({ conversation }) => {
   const user = conversation.user;
+
   const dispatch = useDispatch();
 
   const { selectedUser, onlineUsers } = useSelector(
@@ -12,84 +13,189 @@ const OtherUser = ({ conversation }) => {
   );
 
   const isOnline = onlineUsers?.includes(user._id);
+  const isSelected = selectedUser?._id === user._id;
+  const hasUnread = conversation.unreadCount > 0;
 
   const selectedUserHandler = async () => {
-
     if (selectedUser?._id === user._id) return;
 
+    dispatch(setSelectedUser(user));
+    dispatch(resetUnreadCount(user._id));
+
+
     try {
-      dispatch(setSelectedUser(user));
-
-      if (conversation.unreadCount > 0) {
-        dispatch(resetUnreadCount(user._id));
-
-        try {
-        
-          await axios.patch(
-            `http://localhost:9000/api/v1/conversation/${user._id}/read`,
-            {},
-            {
-              withCredentials: true,
-            }
-          );
-        } catch (error) {
-          console.log(error);
+      await axios.patch(
+        `http://localhost:9000/api/v1/conversation/${user._id}/read`,
+        {},
+        {
+          withCredentials: true,
         }
-      }
-
+      );
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <>
-      <div
-        onClick={selectedUserHandler}
-        className={`${selectedUser?._id === user._id ? "bg-zinc-700" : ""
-          } flex gap-2 items-center hover:bg-zinc-700 rounded-sm p-2 cursor-pointer transition-all duration-200`}
-      >
-        <div className={`avatar ${isOnline ? "avatar-online" : ""}`}>
-          <div className="w-12 rounded-full">
-            <img src={user.profilePhoto} alt="user profile" />
-          </div>
+    <div
+      onClick={selectedUserHandler}
+      className={`
+        group
+        cursor-pointer
+        rounded-3xl
+        border
+        p-4
+        transition-all
+        duration-300
+
+        ${isSelected
+          ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-md"
+          : "border-transparent bg-white hover:border-[var(--color-border)] hover:shadow-md hover:-translate-y-[2px]"
+        }
+      `}
+    >
+      <div className="flex items-center gap-4">
+
+        {/* Avatar */}
+
+        <div className="relative shrink-0">
+
+          <img
+            src={user.profilePhoto}
+            alt={user.fullName}
+            className="
+              h-16
+              w-16
+              rounded-full
+              border-2
+              border-white
+              object-cover
+              shadow-md
+              transition-transform
+              duration-300
+              group-hover:scale-105
+            "
+          />
+
+          {isOnline && (
+            <span
+              className="
+                absolute
+                bottom-1
+                right-1
+                h-4
+                w-4
+                rounded-full
+                border-[3px]
+                border-white
+                bg-[var(--color-accent)]
+                ring-2
+                ring-[var(--color-accent-soft)]
+              "
+            />
+          )}
+
         </div>
 
-        <div className="flex flex-col flex-1">
-          <div className="flex justify-between items-center">
-            <p className="font-semibold text-white">
-              {user.fullName}
-            </p>
+        {/* Details */}
 
-            <span className="text-xs text-gray-300">
-              {conversation.lastMessageTime
-                ? new Date(
+        <div className="flex min-w-0 flex-1 flex-col">
+
+          <div className="flex items-start justify-between">
+
+            <div className="min-w-0">
+
+              <h3
+                className={`
+                  truncate
+                  text-[15px]
+                  font-semibold
+
+                  ${hasUnread
+                    ? "text-[var(--color-ink)]"
+                    : "text-slate-700"
+                  }
+                `}
+              >
+                {user.fullName}
+              </h3>
+
+              <p className="truncate text-xs text-slate-400">
+                @{user.userName}
+              </p>
+
+            </div>
+
+            {conversation.lastMessageTime && (
+              <span
+                className={`
+                  ml-3
+                  shrink-0
+                  text-[11px]
+                  font-medium
+
+                  ${hasUnread
+                    ? "text-[var(--color-accent)]"
+                    : "text-slate-400"
+                  }
+                `}
+              >
+                {new Date(
                   conversation.lastMessageTime
                 ).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
-                })
-                : ""}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-300 truncate">
-              {conversation.lastMessage || "Start a conversation..."}
-            </p>
-
-            {conversation.unreadCount > 0 && (
-              <div className="ml-2 min-w-5 h-5 px-1 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
-                {conversation.unreadCount}
-              </div>
+                })}
+              </span>
             )}
 
           </div>
-        </div>
-      </div>
 
-      <div className="divider my-0 py-0 h-1"></div>
-    </>
+          <div className="mt-3 flex items-center justify-between gap-3">
+
+            <p
+              className={`
+                flex-1
+                truncate
+                text-[13px]
+                leading-5
+
+                ${hasUnread
+                  ? "font-semibold text-[var(--color-ink)]"
+                  : "text-slate-500"
+                }
+              `}
+            >
+              {conversation.lastMessage || "Start a conversation"}
+            </p>
+
+            {hasUnread && (
+              <span
+                className="
+                  flex
+                  h-6
+                  min-w-6
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[var(--color-accent)]
+                  px-2
+                  text-[11px]
+                  font-bold
+                  text-white
+                  shadow-sm
+                "
+              >
+                {conversation.unreadCount}
+              </span>
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
   );
 };
 

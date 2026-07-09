@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import axios from "axios";
 
 import { setIsTyping } from "../redux/userSlice";
 import { setMessages, markMessagesAsSeen, editMessage, deleteMessage as deleteMessageAction, } from "../redux/messageSlice";
 import { updateConversation } from "../redux/conversationSlice";
+
 
 const useSocketEvents = () => {
   const dispatch = useDispatch();
@@ -16,7 +18,6 @@ const useSocketEvents = () => {
     if (!socket) return;
 
     let typingTimer;
-
     // =========================
     // Typing
     // =========================
@@ -49,7 +50,7 @@ const useSocketEvents = () => {
     // =========================
     // New Message
     // =========================
-    const handleNewMessage = (newMessage) => {
+    const handleNewMessage = async (newMessage) => {
       // Always update sidebar preview
       dispatch(
         updateConversation({
@@ -65,6 +66,14 @@ const useSocketEvents = () => {
         const currentMessages = store.getState().message.messages;
 
         dispatch(setMessages([...currentMessages, newMessage]));
+        // To update read-receipts if chat window is open
+        await axios.patch(
+          `http://localhost:9000/api/v1/conversation/${newMessage.senderId}/read`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
       }
     };
 
@@ -72,6 +81,7 @@ const useSocketEvents = () => {
     // Messages Seen
     // =========================
     const handleMessagesSeen = ({ messageIds }) => {
+      console.log("messagesSeen received", messageIds);
       dispatch(
         markMessagesAsSeen({
           messageIds,

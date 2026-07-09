@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import {useDispatch} from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { setAuthUser } from "../redux/userSlice";
 
 const Login = () => {
@@ -11,6 +12,8 @@ const Login = () => {
     userName: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,7 +27,7 @@ const Login = () => {
         },
         withCredentials: true
       });
-      
+
       dispatch(setAuthUser(res.data));
       navigate("/");
     } catch (error) {
@@ -40,62 +43,184 @@ const Login = () => {
     })
   }
 
+  const inputClasses = `
+      h-12
+      w-full
+      rounded-2xl
+      border
+      border-gray-200
+      bg-gray-50
+      px-4
+      text-[15px]
+      text-gray-800
+      placeholder:text-gray-400
+      outline-none
+      transition-all
+      duration-200
+      focus:border-[var(--color-accent)]
+      focus:bg-white
+      focus:ring-4
+      focus:ring-[var(--color-accent)]/10
+      `;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black/20 px-4">
+    <div
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          bg-gradient-to-br
+          from-[var(--color-bg)]
+          via-[#f9fbfb]
+          to-[#eef7f5]
+          px-4
+        ">
       <div className="w-full max-w-md">
         <div
           className="
+            w-full
+            rounded-3xl
+            border-2
+            border-[var(--color-accent)]
+            bg-white
             p-8
-            rounded-2xl
-            bg-white/10
-            backdrop-blur-lg
-            border border-white/20
-            shadow-2xl
+            shadow-[0_20px_50px_rgba(0,0,0,0.08)]
           "
         >
-          <h1 className="text-3xl font-bold text-center text-white mb-6">
-            Login
+          
+          <h1
+            className="mb-2 text-center text-3xl font-bold"
+            style={{ fontFamily: "var(--font-display)", color:"var(--color-accent)" }}
+          >
+            Welcome back
           </h1>
+          <p className="mb-8 text-center text-sm text-gray-500">
+            Log in to keep the conversation going.
+          </p>
 
           <form onSubmit={onSubmitHandler}>
             {/* Username */}
             <div className="mb-4">
-              <label className="label p-1">
-                <span className="label-text text-white">Username</span>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Username
               </label>
               <input
-                value={user.userName} onChange={(e) => setUser({ ...user, userName: e.target.value })}
+                value={user.userName}
+                onChange={(e) => setUser({ ...user, userName: e.target.value })}
                 type="text"
                 placeholder="username"
-                className="input input-bordered w-full bg-white/10 border-white/20 text-white placeholder-gray-300"
+                className="
+                  h-12
+                  w-full
+                  rounded-xl
+                  border
+                  border-[var(--color-accent)]
+                  bg-white/[0.06]
+                  px-4
+                  text-[15px]
+                  text-black
+                  outline-none
+                  transition-all
+                  duration-200
+                  placeholder:text-gray-700
+                  focus:border-[var(--color-accent)]
+                  focus:bg-white/10
+                  focus:ring-4
+                  focus:ring-[var(--color-accent)]/20
+                "
               />
             </div>
 
             {/* Password */}
-            <div className="mb-4">
-              <label className="label p-1">
-                <span className="label-text text-white">Password</span>
+            <div className="mb-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                Password
               </label>
-              <input
-                value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })}
-                type="password"
-                placeholder="Password"
-                className="input input-bordered w-full bg-white/10 border-white/20 text-white placeholder-gray-300"
-              />
+              <div className="relative">
+                <input
+                  value={user.password}
+                  onChange={(e) => setUser({ ...user, password: e.target.value })}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="
+                    h-12
+                    w-full
+                    rounded-xl
+                    border
+                    border-[var(--color-accent)]
+                    bg-white/[0.06]
+                    px-4
+                    pr-12
+                    text-[15px]
+                    text-black
+                    outline-none
+                    transition-all
+                    duration-200
+                    placeholder:text-gray-700
+                    focus:border-[var(--color-accent)]
+                    focus:bg-white/10
+                    focus:ring-4
+                    focus:ring-[var(--color-accent)]/20
+                  "
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="
+                    absolute
+                    right-3
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                    transition-colors
+                    duration-200
+                    hover:text-[var(--color-accent)]
+                  "
+                >
+                  {showPassword ? <FiEyeOff size={19} /> : <FiEye size={19} />}
+                </button>
+              </div>
             </div>
 
             {/* SignUp Link */}
             <Link
               to="/register"
-              className="block text-center text-sm text-white hover:underline mb-4"
+              className="
+                mb-6
+                mt-4
+                block
+                text-center
+                text-sm
+                text-gray-500
+                transition-all
+                duration-200
+                hover:text-[var(--color-accent)]
+                hover:underline
+                "
             >
-              Don't have an account? SignUp
+              Don't have an account? Sign up
             </Link>
 
             {/* Button */}
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              className="
+                h-12
+                w-full
+                rounded-2xl
+                bg-[var(--color-accent)]
+                text-white
+                text-[15px]
+                font-semibold
+                shadow-lg
+                transition-all
+                duration-300
+                hover:brightness-110
+                hover:shadow-xl
+                active:scale-95
+                "               
             >
               Login
             </button>

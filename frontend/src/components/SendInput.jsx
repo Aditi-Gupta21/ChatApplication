@@ -97,20 +97,59 @@ const SendInput = () => {
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="w-full p-4 border-t border-zinc-700"
+      className="sticky bottom-0 border-t border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-3 backdrop-blur-md md:px-4 md:py-4"
     >
-      <div className="relative ">
+      <div className="flex items-center gap-2 md:gap-3">
         <input
           type="text"
           value={message}
           onChange={typingHandler}
-          placeholder="Send a message..."
-          className="w-full border border-zinc-500 bg-gray-700 text-white rounded-lg p-3 pr-12 focus:outline-none focus:border-blue-500"
+          placeholder="Type a message..."
+          className="
+            h-12
+            flex-1
+            rounded-full
+            border
+            border-[var(--color-border)]
+            bg-[var(--color-surface-muted)]
+            px-5
+            text-[15px]
+            text-[var(--color-ink)]
+            outline-none
+            transition-all
+            duration-200
+            placeholder:text-slate-400
+            focus:border-[var(--color-accent)]
+            focus:bg-[var(--color-surface)]
+            focus:ring-4
+            focus:ring-[var(--color-accent-soft)]
+          "
         />
 
         <button
           type="submit"
-          className="absolute inset-y-0 right-0 flex items-center pr-4 text-white hover:text-blue-400"
+          disabled={!message.trim()}
+          className="
+            flex
+            h-12
+            w-12
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            bg-[var(--color-accent)]
+            text-white
+            shadow-md
+            transition-all
+            duration-200
+            hover:scale-105
+            hover:brightness-110
+            active:scale-95
+            disabled:scale-100
+            disabled:cursor-not-allowed
+            disabled:bg-slate-300
+            disabled:shadow-none
+          "
         >
           <IoSend size={20} />
         </button>

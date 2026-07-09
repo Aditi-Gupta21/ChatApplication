@@ -5,6 +5,7 @@ const userSlice = createSlice({
   initialState: {
     authUser: null,
     selectedUser: null,
+    otherUsers: [],
     onlineUsers: [],
     isTyping:false
   },
@@ -13,8 +14,19 @@ const userSlice = createSlice({
       state.authUser = action.payload;
     },
 
+    updateAuthUser: (state, action) => {
+      state.authUser = {
+        ...state.authUser,
+        ...action.payload,
+      };
+    },
+
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
+    },
+
+    setOtherUsers: (state, action) => {
+      state.otherUsers = action.payload;
     },
 
     setOnlineUser: (state, action) => {
@@ -29,7 +41,9 @@ const userSlice = createSlice({
 
 export const {
   setAuthUser,
+  updateAuthUser,
   setSelectedUser,
+  setOtherUsers,
   setOnlineUser,
   setIsTyping
 } = userSlice.actions;
