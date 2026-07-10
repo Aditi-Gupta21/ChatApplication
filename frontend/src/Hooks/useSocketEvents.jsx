@@ -68,7 +68,7 @@ const useSocketEvents = () => {
         dispatch(setMessages([...currentMessages, newMessage]));
         // To update read-receipts if chat window is open
         await axios.patch(
-          `http://localhost:9000/api/v1/conversation/${newMessage.senderId}/read`,
+          `${import.meta.env.VITE_API_URL}/conversation/${newMessage.senderId}/read`,
           {},
           {
             withCredentials: true,
@@ -81,7 +81,7 @@ const useSocketEvents = () => {
     // Messages Seen
     // =========================
     const handleMessagesSeen = ({ messageIds }) => {
-      console.log("messagesSeen received", messageIds);
+      
       dispatch(
         markMessagesAsSeen({
           messageIds,

@@ -1,4 +1,3 @@
-import React from "react";
 import EditMessageInput from "./EditMessageInput";
 import MessageMenu from "./MessageMenu";
 

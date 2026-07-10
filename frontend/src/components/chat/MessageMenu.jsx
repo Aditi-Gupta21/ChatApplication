@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { MdEdit, MdDelete, MdForward } from "react-icons/md";
 

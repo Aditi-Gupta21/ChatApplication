@@ -1,4 +1,3 @@
-import React from "react";
 import { FiUsers, FiSearch } from "react-icons/fi";
 import OtherUser from "./OtherUser";
 import useGetSidebarConversations from "../Hooks/useGetSidebarConversations";

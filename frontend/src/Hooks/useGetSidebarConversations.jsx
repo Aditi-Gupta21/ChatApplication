@@ -13,7 +13,7 @@ const useGetSidebarConversations = () => {
         dispatch(setConversationLoading(true));
 
         const res = await axios.get(
-          "http://localhost:9000/api/v1/conversation/sidebar",
+          `${import.meta.env.VITE_API_URL}/conversation/sidebar`,
           {
             withCredentials: true,
           }

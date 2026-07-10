@@ -17,7 +17,7 @@ const useGetMessages = () => {
         dispatch(setLoading(true));
 
         const res = await axios.get(
-          `http://localhost:9000/api/v1/message/${selectedUser._id}`,
+          `${import.meta.env.VITE_API_URL}/message/${selectedUser._id}`,
           {
             withCredentials: true,
           }

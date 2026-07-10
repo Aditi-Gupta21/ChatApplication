@@ -1,13 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "chatApp backend by patel mernStack",
+  "description": "Real-time MERN chat application backend",
   "license": "ISC",
   "author": "Aditi Gupta",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

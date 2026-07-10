@@ -52,7 +52,7 @@ function App() {
     }
 
     // Create socket connection
-    const socket = io("http://localhost:9000", {
+    const socket = io(import.meta.env.VITE_SOCKET_URL, {
       query: {
         userId: authUser._id,
       },

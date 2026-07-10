@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
 import toast from "react-hot-toast";
@@ -20,7 +20,7 @@ const SignUp = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://localhost:9000/api/v1/user/register', user, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/register`, user, {
         headers: {
           'Content-Type': 'application/json'
         },

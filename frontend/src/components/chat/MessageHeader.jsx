@@ -1,4 +1,3 @@
-import React from "react";
 import MessageMenu from "./MessageMenu";
 
 const MessageHeader = ({

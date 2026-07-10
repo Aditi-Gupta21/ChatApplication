@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiArrowLeft, FiRefreshCw, FiLock } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -26,7 +26,7 @@ const Profile = () => {
 
     try {
       const res = await axios.patch(
-        "http://localhost:9000/api/v1/user/profile",
+        `${import.meta.env.VITE_API_URL}/user/profile`,
         { fullName },
         { withCredentials: true }
       );
@@ -47,7 +47,7 @@ const Profile = () => {
 
     try {
       const res = await axios.patch(
-        "http://localhost:9000/api/v1/user/profile",
+        `${import.meta.env.VITE_API_URL}/user/profile`,
         { generateAvatar: true },
         { withCredentials: true }
       );

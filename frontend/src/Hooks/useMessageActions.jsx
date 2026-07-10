@@ -69,7 +69,7 @@ const useMessageActions = ({
 
     try {
       const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/edit/${message._id}`,
+        `${import.meta.env.VITE_API_URL}/message/edit/${message._id}`,
         {
           message: editedText,
         },
@@ -103,7 +103,7 @@ const useMessageActions = ({
 
     try {
       const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/delete/${message._id}`,
+        `${import.meta.env.VITE_API_URL}/message/delete/${message._id}`,
         {},
         {
           withCredentials: true,
@@ -138,7 +138,7 @@ const useMessageActions = ({
 
     try {
       const res = await axios.patch(
-        `http://localhost:9000/api/v1/message/deleteforme/${message._id}`,
+        `${import.meta.env.VITE_API_URL}/message/deleteforme/${message._id}`,
         {},
         {
           withCredentials: true,
@@ -167,7 +167,7 @@ const useMessageActions = ({
 
     try {
       await axios.post(
-        "http://localhost:9000/api/v1/message/forward",
+        `${import.meta.env.VITE_API_URL}/message/forward`,
         {
           receiverIds: selectedUsers,
           message: message.message,

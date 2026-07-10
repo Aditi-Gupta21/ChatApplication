@@ -10,13 +10,13 @@ const useGetOtherUsers = () => {
   useEffect(() => {
     const fetchOtherUsers = async () => {
       try {
+
         const res = await axios.get(
-          "http://localhost:9000/api/v1/user/",
+          `${import.meta.env.VITE_API_URL}/user/`,
           {
             withCredentials: true,
           }
         );
-
         dispatch(setOtherUsers(res.data));
       } catch (error) {
         console.log(error);

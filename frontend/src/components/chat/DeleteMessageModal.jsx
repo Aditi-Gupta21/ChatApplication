@@ -1,5 +1,3 @@
-import { FiAlertTriangle } from "react-icons/fi";
-
 const DeleteMessageModal = ({
   open,
   onClose,

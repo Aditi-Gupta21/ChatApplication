@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -70,7 +70,7 @@ const SendInput = () => {
       }
 
       const res = await axios.post(
-        `http://localhost:9000/api/v1/message/send/${selectedUser._id}`,
+        `${import.meta.env.VITE_API_URL}/message/send/${selectedUser._id}`,
         { message },
         {
           headers: {

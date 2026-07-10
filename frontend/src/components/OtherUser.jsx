@@ -25,7 +25,7 @@ const OtherUser = ({ conversation }) => {
 
     try {
       await axios.patch(
-        `http://localhost:9000/api/v1/conversation/${user._id}/read`,
+        `${import.meta.env.VITE_API_URL}/conversation/${user._id}/read`,
         {},
         {
           withCredentials: true,

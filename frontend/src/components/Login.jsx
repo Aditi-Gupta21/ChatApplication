@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux'
@@ -19,9 +19,8 @@ const Login = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post('http://localhost:9000/api/v1/user/login', user, {
+      const res = await axios.post( `${import.meta.env.VITE_API_URL}/user/login`, user, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -42,26 +41,6 @@ const Login = () => {
       password: "",
     })
   }
-
-  const inputClasses = `
-      h-12
-      w-full
-      rounded-2xl
-      border
-      border-gray-200
-      bg-gray-50
-      px-4
-      text-[15px]
-      text-gray-800
-      placeholder:text-gray-400
-      outline-none
-      transition-all
-      duration-200
-      focus:border-[var(--color-accent)]
-      focus:bg-white
-      focus:ring-4
-      focus:ring-[var(--color-accent)]/10
-      `;
 
   return (
     <div

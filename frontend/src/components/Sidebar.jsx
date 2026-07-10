@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BiSearchAlt2 } from "react-icons/bi";
 import { FiLogOut, FiUser } from "react-icons/fi";
 import OtherUsers from "./OtherUsers";
@@ -19,7 +19,7 @@ const Sidebar = () => {
   const logoutHandler = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:9000/api/v1/user/logout",
+        `${import.meta.env.VITE_API_URL}/user/logout`,
         {
           withCredentials: true,
         }
