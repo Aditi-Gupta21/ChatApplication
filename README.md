@@ -297,11 +297,6 @@ VITE_SOCKET_URL=http://localhost:9000
 | Backend | Render |
 | Database | MongoDB Atlas |
 
-### Live Application
-
-- **Frontend:** https://connectify-iota-five.vercel.app
-- **Backend API:** https://connectify-5q6s.onrender.com
-
 ## 🔮 Future Improvements
 
 - Group chat support
@@ -319,12 +314,22 @@ VITE_SOCKET_URL=http://localhost:9000
 
 **Aditi Gupta**
 
-MCA Student
+## 📄 License
 
-GitHub: https://github.com/Aditi-Gupta21
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
 
-LinkedIn: https://www.linkedin.com/in/aditi-gupta-b923aa284/
+---
 
-## 🙏 Acknowledgements
+## ⭐ Support
 
-This project was developed as part of my MCA Final Year Project to demonstrate full-stack web development, real-time communication, secure authentication, and modern deployment practices using the MERN stack.
+If you found this project helpful, please consider giving it a ⭐ on GitHub. Your support is greatly appreciated!
+
+---
+
+<div align="center">
+
+Made with ❤️ using **React**, **Node.js**, **Express.js**, **MongoDB**, **Socket.IO**, and **Redux Toolkit**
+
+© 2026 Connectify. All Rights Reserved.
+
+</div>
