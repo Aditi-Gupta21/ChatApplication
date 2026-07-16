@@ -310,10 +310,6 @@ VITE_SOCKET_URL=http://localhost:9000
 - End-to-end encryption
 - Progressive Web App (PWA) support
 
-## 👩‍💻 Author
-
-**Aditi Gupta**
-
 ## 📄 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
