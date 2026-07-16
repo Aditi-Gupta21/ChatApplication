@@ -5,6 +5,7 @@ import axios from "axios";
 import { setIsTyping } from "../redux/userSlice";
 import { setMessages, markMessagesAsSeen, editMessage, deleteMessage as deleteMessageAction, } from "../redux/messageSlice";
 import { updateConversation } from "../redux/conversationSlice";
+import { refreshSidebar } from "../utils/refreshSidebar";
 
 
 const useSocketEvents = () => {
@@ -60,7 +61,7 @@ const useSocketEvents = () => {
           incrementUnread: selectedUser?._id !== newMessage.senderId,
         })
       );
-
+      await refreshSidebar(dispatch);
       // Update chat only if this conversation is currently open
       if (selectedUser?._id === newMessage.senderId) {
         const currentMessages = store.getState().message.messages;

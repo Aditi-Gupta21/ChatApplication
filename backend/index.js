@@ -32,6 +32,13 @@ app.use("/api/v1/message", messageRoute);
 
 app.use("/api/v1/conversation", conversationRoute )
 
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Connectify Backend API is running 🚀",
+  });
+});
+
 server.listen(PORT, ()=>{
   console.log(`Sever listen at port ${PORT}`);
 })

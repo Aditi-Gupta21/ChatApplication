@@ -4,6 +4,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../redux/messageSlice";
 import { updateConversation } from '../redux/conversationSlice'
+import { refreshSidebar } from "../utils/refreshSidebar";
 
 const SendInput = () => {
   const [message, setMessage] = useState("");
@@ -86,7 +87,9 @@ const SendInput = () => {
         message: res.data.newMessage.message,
         createdAt: res.data.newMessage.createdAt,
       }));
-
+      
+      await refreshSidebar(dispatch);
+      
       // Clear the input after sending
       setMessage("");
     } catch (error) {

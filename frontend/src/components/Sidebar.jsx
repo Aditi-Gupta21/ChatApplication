@@ -77,7 +77,7 @@ const Sidebar = () => {
           <div className="flex gap-2">
 
             <button
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate("/profile", {replace:true})}
               title="Profile"
               className="
                 flex
