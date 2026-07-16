@@ -6,13 +6,13 @@
 
 ## 🌐 Live Demo
 
-**Frontend:** https://connectify-iota-five.vercel.app
+🔗 Frontend: https://connectify-iota-five.vercel.app
 
-**Backend API:** https://connectify-5q6s.onrender.com
+🔗 Backend API: https://connectify-5q6s.onrender.com
 
 ## 📖 Project Overview
 
-Connectify is a real-time messaging application developed as an MCA Final Year Project.
+Connectify is a modern full-stack real-time chat application built using the MERN stack. It is designed to provide a secure, responsive, and seamless messaging experience across desktop and mobile devices.
 
 The application allows users to register, log in securely, exchange real-time messages, edit and delete messages, forward messages, update their profile, view online users, and receive typing indicators.
 
@@ -208,8 +208,8 @@ Connectify/
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY_NAME>.git
-cd <YOUR_REPOSITORY_NAME>
+git clone https://github.com/Aditi-Gupta21/Connectify.git
+cd Connectify
 ```
 
 ### Backend Setup
@@ -321,9 +321,9 @@ VITE_SOCKET_URL=http://localhost:9000
 
 MCA Student
 
-GitHub: https://github.com/https://github.com/Aditi-Gupta21
+GitHub: https://github.com/Aditi-Gupta21
 
-LinkedIn: https://linkedin.com/in/https://www.linkedin.com/in/aditi-gupta-b923aa284/
+LinkedIn: https://www.linkedin.com/in/aditi-gupta-b923aa284/
 
 ## 🙏 Acknowledgements
 
